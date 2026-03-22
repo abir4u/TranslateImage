@@ -1,6 +1,6 @@
 # Translate Image
 
-This app helps translate text in images from any language to a language of your choice.
+This app aims to help translate text in images from any language to a language of your choice.
 
 You can open the app, open / click the image from within the app, select the target text to translate and translate it.
 
