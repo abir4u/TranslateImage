@@ -13,7 +13,9 @@ struct ContentView: View {
     @State private var image: UIImage?
     @State private var recognizedText = ""
     @State private var showPicker = false
-    
+    @State private var sourceType: UIImagePickerController.SourceType = .photoLibrary
+    @State private var showSourceSelection = false
+
     var body: some View {
         VStack {
             if let image = image {
@@ -29,7 +31,7 @@ struct ContentView: View {
             
             HStack {
                 Button("Select Image") {
-                    showPicker = true
+                    showSourceSelection = true
                 }
                 
                 Button("Copy Text") {
@@ -39,10 +41,21 @@ struct ContentView: View {
             }
             .padding()
         }
+        .confirmationDialog("Select Source", isPresented: $showSourceSelection) {
+                    Button("Camera") {
+                        self.sourceType = .camera
+                        self.showPicker = true
+                    }
+                    Button("Photo Gallery") {
+                        self.sourceType = .photoLibrary
+                        self.showPicker = true
+                    }
+                    Button("Cancel", role: .cancel) { }
+                }
         .sheet(isPresented: $showPicker) {
-            ImagePicker(image: $image) { img in
-                performTextRecognition(in: img) { text in
-                    recognizedText = text
+                    ImagePicker(image: $image, sourceType: sourceType) { img in
+                        performTextRecognition(in: img) { text in
+                            recognizedText = text
                 }
             }
         }
