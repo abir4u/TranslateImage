@@ -15,6 +15,7 @@ struct ContentView: View {
     @State private var showPicker = false
     @State private var sourceType: UIImagePickerController.SourceType = .photoLibrary
     @State private var showSourceSelection = false
+    @State private var showTranslationCover = false
 
     var body: some View {
         VStack {
@@ -40,12 +41,15 @@ struct ContentView: View {
                 .disabled(recognizedText.isEmpty)
                 
                 Button("Translate") {
-                    // 
+                    showTranslationCover = true
                 }
                 .disabled(recognizedText.isEmpty)
             }
             .padding()
         }
+        .fullScreenCover(isPresented: $showTranslationCover) {
+                    // Translation functionality
+                }
         .confirmationDialog("Select Source", isPresented: $showSourceSelection) {
                     Button("Camera") {
                         self.sourceType = .camera
