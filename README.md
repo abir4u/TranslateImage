@@ -7,7 +7,7 @@ You can open the app, open / click the image from within the app, select the tar
 ## Current progress
 
 I am working on the MVP of this app. As of now, I have been able to implement:
-1. Opening of an existing image from Photos
+1. Selecting an image from Photos or by clicking one with device Camera
 2. Detecting all text from the image together
 3. Copy the text and use it outside the app
 
