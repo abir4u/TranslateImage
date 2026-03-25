@@ -13,21 +13,31 @@ struct TranslationView: View {
     @State var textToTranslate: String
     
     @State private var translatedText = ""
+    @State private var isTranslating = false
     @State private var configuration: TranslationSession.Configuration?
     
     @State private var sourceLanguage = "en"
     @State private var targetLanguage = "es"
     
+    let languages = [
+        "en": "English", "es": "Spanish", "fr": "French",
+        "de": "German", "it": "Italian", "zh": "Chinese", "ja": "Japanese"
+    ]
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
                 Form {
                     Section("Settings") {
                         Picker("From", selection: $sourceLanguage) {
-                            // Implement from text field
+                            ForEach(languages.keys.sorted(), id: \.self) { key in
+                                Text(languages[key]!).tag(key)
+                            }
                         }
                         Picker("To", selection: $targetLanguage) {
-                            // Implement to text field
+                            ForEach(languages.keys.sorted(), id: \.self) { key in
+                                Text(languages[key]!).tag(key)
+                            }
                         }
                     }
                     
@@ -37,7 +47,13 @@ struct TranslationView: View {
                     }
                     
                     Section("Translation") {
-                        // Translation section
+                        if isTranslating {
+                            ProgressView("Translating...")
+                                .frame(maxWidth: .infinity)
+                        } else {
+                            Text(translatedText.isEmpty ? "Tap translate to begin" : translatedText)
+                                .foregroundColor(translatedText.isEmpty ? .secondary : .primary)
+                        }
                     }
                 }
                 
@@ -50,6 +66,7 @@ struct TranslationView: View {
                         .foregroundColor(.white)
                         .cornerRadius(12)
                 }
+                .disabled(textToTranslate.isEmpty || isTranslating)
                 .padding()
             }
             .navigationTitle("Translate")
@@ -59,10 +76,24 @@ struct TranslationView: View {
                     Button("Cancel") { dismiss() }
                 }
             }
+            .translationTask(configuration) { session in
+                do {
+                    let response = try await session.translate(textToTranslate)
+                    self.translatedText = response.targetText
+                } catch {
+                    self.translatedText = "Error: \(error.localizedDescription)"
+                }
+                self.isTranslating = false
+                self.configuration = nil
+            }
         }
     }
 
     func triggerTranslation() {
-        // Implement translation here
+        isTranslating = true
+        configuration = TranslationSession.Configuration(
+            source: Locale.Language(identifier: sourceLanguage),
+            target: Locale.Language(identifier: targetLanguage)
+        )
     }
 }
