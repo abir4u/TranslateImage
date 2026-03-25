@@ -38,6 +38,11 @@ struct ContentView: View {
                     UIPasteboard.general.string = recognizedText
                 }
                 .disabled(recognizedText.isEmpty)
+                
+                Button("Translate") {
+                    // 
+                }
+                .disabled(recognizedText.isEmpty)
             }
             .padding()
         }
