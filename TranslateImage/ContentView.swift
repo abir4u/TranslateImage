@@ -48,7 +48,7 @@ struct ContentView: View {
             .padding()
         }
         .fullScreenCover(isPresented: $showTranslationCover) {
-                    // Translation functionality
+            TranslationView(textToTranslate: recognizedText)
                 }
         .confirmationDialog("Select Source", isPresented: $showSourceSelection) {
                     Button("Camera") {
