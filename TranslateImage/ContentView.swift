@@ -17,7 +17,8 @@ struct ContentView: View {
     @State private var showSourceSelection = false
     @State private var showTranslationCover = false
     @State private var showTransformationCover = false
-
+    @State private var textBlocks: [TextBlock] = []
+    
     var body: some View {
         VStack {
             if let image = image {
@@ -57,8 +58,10 @@ struct ContentView: View {
             TranslationView(textToTranslate: recognizedText)
                 }
         .fullScreenCover(isPresented: $showTransformationCover) {
-            TransformView(textToTranslate: recognizedText)
-                }
+            if let image = image {
+                TransformView(originalImage: image, textBlocks: textBlocks)
+            }
+        }
         .confirmationDialog("Select Source", isPresented: $showSourceSelection) {
                     Button("Camera") {
                         self.sourceType = .camera
@@ -71,9 +74,10 @@ struct ContentView: View {
                     Button("Cancel", role: .cancel) { }
                 }
         .sheet(isPresented: $showPicker) {
-                    ImagePicker(image: $image, sourceType: sourceType) { img in
-                        performTextRecognition(in: img) { text in
-                            recognizedText = text
+            ImagePicker(image: $image, sourceType: sourceType) { img in
+                performTextRecognition(in: img) { text, blocks in
+                    self.recognizedText = text
+                    self.textBlocks = blocks // Store blocks for transformation
                 }
             }
         }

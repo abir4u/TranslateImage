@@ -8,25 +8,33 @@
 import Vision
 import UIKit
 
-func performTextRecognition(in image: UIImage, completion: @escaping (String) -> Void) {
+struct TextBlock {
+    let text: String
+    let boundingBox: CGRect
+}
+
+func performTextRecognition(in image: UIImage, completion: @escaping (String, [TextBlock]) -> Void) {
     guard let cgImage = image.cgImage else {
-        completion("")
+        completion("", [])
         return
     }
     
     let request = VNRecognizeTextRequest { (request, error) in
         guard let observations = request.results as? [VNRecognizedTextObservation] else {
-            completion("")
+            completion("", [])
             return
         }
         
-        let recognizedText = observations.compactMap { $0.topCandidates(1).first?.string }.joined(separator: "\n")
-        completion(recognizedText)
+        let blocks = observations.compactMap { observation -> TextBlock? in
+            guard let candidate = observation.topCandidates(1).first else { return nil }
+            return TextBlock(text: candidate.string, boundingBox: observation.boundingBox)
+        }
+        
+        let fullText = blocks.map { $0.text }.joined(separator: "\n")
+        completion(fullText, blocks)
     }
     
     request.recognitionLevel = .accurate
-    request.usesLanguageCorrection = true
-    
     let handler = VNImageRequestHandler(cgImage: cgImage, orientation: .up, options: [:])
     try? handler.perform([request])
 }
