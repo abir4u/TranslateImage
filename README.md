@@ -1,8 +1,11 @@
 # Translate Image
 
-This app aims to help translate text in images from any language to a language of your choice.
+This app aims to help translate text in images from any language to a language of your choice. It also helps generate the same image in a different language of your choice keep the rest of the image intact.
+
+## Highlighted features
 
 You can open the app, open / click the image from within the app, select the target text to translate and translate it.
+You can also capture the image and choose to generate a new image with translated text.
 
 ## Current progress
 
@@ -10,8 +13,9 @@ I am working on the MVP of this app. As of now, I have been able to implement:
 1. Selecting an image from Photos or by clicking one with device Camera
 2. Detecting all text from the image together
 3. Copy the text and use it outside the app
+4. BEST FEATURE: Transform an image by changing all its text to a different language while still keeping its image format intact
 
 
 ## Next step
 
-In the next two week, I am aiming to complete translating of this text from any language to English.
+In the next two week, I am aiming to complete translating of this text from any language to any language with support for atleast top 12 languages in the world.
