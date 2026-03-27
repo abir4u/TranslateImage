@@ -10,60 +10,42 @@ import Translation
 
 struct TransformView: View {
     @Environment(\.dismiss) var dismiss
-    var originalImage: UIImage
-    var textBlocks: [TextBlock]
+    let originalImage: UIImage
+    let textBlocks: [TextBlock]
     
     @State private var transformedImage: UIImage?
     @State private var isProcessing = false
     @State private var sourceLanguage = "en"
     @State private var targetLanguage = "es"
-    
     @State private var configuration: TranslationSession.Configuration?
-    
-    let languages = [
-        "en": "English", "es": "Spanish", "fr": "French",
-        "de": "German", "it": "Italian", "zh": "Chinese", "ja": "Japanese"
-    ]
 
     var body: some View {
         NavigationStack {
             VStack {
-                if let transformedImage = transformedImage {
-                    Image(uiImage: transformedImage)
-                        .resizable()
-                        .scaledToFit()
-                        .padding()
+                if let transformedImage {
+                    Image(uiImage: transformedImage).resizable().scaledToFit().padding()
                 } else {
                     Form {
-                        Section("Languages") {
-                            Picker("From", selection: $sourceLanguage) {
-                                ForEach(languages.keys.sorted(), id: \.self) { key in
-                                    Text(languages[key]!).tag(key)
-                                }
-                            }
-                            Picker("To", selection: $targetLanguage) {
-                                ForEach(languages.keys.sorted(), id: \.self) { key in
-                                    Text(languages[key]!).tag(key)
-                                }
-                            }
-                        }
+                        LanguagePickerSection(source: $sourceLanguage, target: $targetLanguage)
                     }
                 }
-
-                Button(action: startTransformation) {
-                    if isProcessing {
-                        ProgressView()
-                    } else {
-                        Text(transformedImage == nil ? "Transform Image" : "Save Image")
-                            .bold()
-                    }
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(isProcessing)
             }
             .navigationTitle("Image Transform")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+            }
+            .safeAreaInset(edge: .bottom) {
+                Button(transformedImage == nil ? "Transform" : "Done") {
+                    if transformedImage == nil {
+                        configuration = .init(source: .init(identifier: sourceLanguage),
+                                             target: .init(identifier: targetLanguage))
+                    } else { dismiss() }
+                }
+                .buttonStyle(.borderedProminent).padding()
             }
             .translationTask(configuration) { session in
                 await processImage(with: session)
@@ -71,61 +53,36 @@ struct TransformView: View {
         }
     }
 
-    func startTransformation() {
-        isProcessing = true
-        configuration = TranslationSession.Configuration(
-            source: Locale.Language(identifier: sourceLanguage),
-            target: Locale.Language(identifier: targetLanguage)
-        )
-    }
-
     func processImage(with session: TranslationSession) async {
         isProcessing = true
-        
-        var translatedBlocks: [(text: String, rect: CGRect)] = []
-        let imgWidth = originalImage.size.width
-        let imgHeight = originalImage.size.height
-        
+        var translatedData: [(text: String, rect: CGRect)] = []
+        let size = originalImage.size
+
         for block in textBlocks {
-            do {
-                let response = try await session.translate(block.text)
-                
+            if let response = try? await session.translate(block.text) {
                 let rect = CGRect(
-                    x: block.boundingBox.origin.x * imgWidth,
-                    y: (1 - block.boundingBox.origin.y - block.boundingBox.height) * imgHeight,
-                    width: block.boundingBox.width * imgWidth,
-                    height: block.boundingBox.height * imgHeight
+                    x: block.boundingBox.origin.x * size.width,
+                    y: (1 - block.boundingBox.origin.y - block.boundingBox.height) * size.height,
+                    width: block.boundingBox.width * size.width,
+                    height: block.boundingBox.height * size.height
                 )
-                translatedBlocks.append((text: response.targetText, rect: rect))
-            } catch {
-                print("Translation failed for block: \(block.text)")
+                translatedData.append((response.targetText, rect))
             }
         }
-        
-        let renderer = UIGraphicsImageRenderer(size: originalImage.size)
-        let newImage = renderer.image { context in
+
+        let renderer = UIGraphicsImageRenderer(size: size)
+        let result = renderer.image { context in
             originalImage.draw(at: .zero)
-            
-            for block in translatedBlocks {
-                UIColor.white.setFill()
-                context.fill(block.rect)
-                
-                let style = NSMutableParagraphStyle()
-                style.alignment = .center
-                let attributes: [NSAttributedString.Key: Any] = [
-                    .font: UIFont.systemFont(ofSize: block.rect.height * 0.8),
-                    .foregroundColor: UIColor.black,
-                    .paragraphStyle: style
-                ]
-                block.text.draw(in: block.rect, withAttributes: attributes)
+            for item in translatedData {
+                UIColor.white.setFill() // Placeholder for background matching
+                context.fill(item.rect)
+                item.text.draw(in: item.rect, withAttributes: [.font: UIFont.systemFont(ofSize: item.rect.height * 0.8)])
             }
         }
-        
+
         await MainActor.run {
-            self.transformedImage = newImage
+            self.transformedImage = result
             self.isProcessing = false
-            self.configuration = nil
         }
     }
-
 }

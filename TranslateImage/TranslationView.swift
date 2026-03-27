@@ -11,89 +11,42 @@ import Translation
 struct TranslationView: View {
     @Environment(\.dismiss) var dismiss
     @State var textToTranslate: String
-    
     @State private var translatedText = ""
     @State private var isTranslating = false
     @State private var configuration: TranslationSession.Configuration?
-    
     @State private var sourceLanguage = "en"
     @State private var targetLanguage = "es"
-    
-    let languages = [
-        "en": "English", "es": "Spanish", "fr": "French",
-        "de": "German", "it": "Italian", "zh": "Chinese", "ja": "Japanese"
-    ]
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                Form {
-                    Section("Settings") {
-                        Picker("From", selection: $sourceLanguage) {
-                            ForEach(languages.keys.sorted(), id: \.self) { key in
-                                Text(languages[key]!).tag(key)
-                            }
-                        }
-                        Picker("To", selection: $targetLanguage) {
-                            ForEach(languages.keys.sorted(), id: \.self) { key in
-                                Text(languages[key]!).tag(key)
-                            }
-                        }
-                    }
-                    
-                    Section("Original Text") {
-                        TextEditor(text: $textToTranslate)
-                            .frame(minHeight: 100)
-                    }
-                    
-                    Section("Translation") {
-                        if isTranslating {
-                            ProgressView("Translating...")
-                                .frame(maxWidth: .infinity)
-                        } else {
-                            Text(translatedText.isEmpty ? "Tap translate to begin" : translatedText)
-                                .foregroundColor(translatedText.isEmpty ? .secondary : .primary)
-                        }
-                    }
+            Form {
+                LanguagePickerSection(source: $sourceLanguage, target: $targetLanguage)
+                
+                Section("Original Text") {
+                    TextEditor(text: $textToTranslate).frame(minHeight: 100)
                 }
                 
-                Button(action: triggerTranslation) {
-                    Text("Translate Now")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(textToTranslate.isEmpty ? Color.gray : Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(12)
+                Section("Translation") {
+                    if isTranslating { ProgressView() }
+                    else { Text(translatedText.isEmpty ? "..." : translatedText) }
                 }
-                .disabled(textToTranslate.isEmpty || isTranslating)
-                .padding()
             }
             .navigationTitle("Translate")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancel") { dismiss() }
+            .toolbar { ToolbarItem(placement: .topBarLeading) { Button("Close") { dismiss() } } }
+            .safeAreaInset(edge: .bottom) {
+                Button("Translate Now") {
+                    configuration = .init(source: .init(identifier: sourceLanguage),
+                                         target: .init(identifier: targetLanguage))
                 }
+                .buttonStyle(.borderedProminent).padding()
             }
             .translationTask(configuration) { session in
-                do {
-                    let response = try await session.translate(textToTranslate)
-                    self.translatedText = response.targetText
-                } catch {
-                    self.translatedText = "Error: \(error.localizedDescription)"
+                isTranslating = true
+                if let response = try? await session.translate(textToTranslate) {
+                    translatedText = response.targetText
                 }
-                self.isTranslating = false
-                self.configuration = nil
+                isTranslating = false
             }
         }
-    }
-
-    func triggerTranslation() {
-        isTranslating = true
-        configuration = TranslationSession.Configuration(
-            source: Locale.Language(identifier: sourceLanguage),
-            target: Locale.Language(identifier: targetLanguage)
-        )
     }
 }
