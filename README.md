@@ -10,10 +10,10 @@ You can also capture the image and choose to generate a new image with translate
 ## Current progress
 
 I am working on the MVP of this app. As of now, I have been able to implement:
-1. Selecting an image from Photos or by clicking one with device Camera
-2. Detecting all text from the image together
-3. Copy the text and use it outside the app
-4. BEST FEATURE: Transform an image by changing all its text to a different language while still keeping its image format intact
+1. Selecting an image from Photos or through Camera
+2. Copy the text and use it outside the app
+3. Translate text to 7 popular languages
+4. BEST FEATURE: Transform an image by changing all its text to one of the 7 popular languages while still keeping the rest of the image intact
 
 
 ## Next step
