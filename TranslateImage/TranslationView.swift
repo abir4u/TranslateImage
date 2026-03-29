@@ -34,11 +34,18 @@ struct TranslationView: View {
             .navigationTitle("Translate")
             .toolbar { ToolbarItem(placement: .topBarLeading) { Button("Close") { dismiss() } } }
             .safeAreaInset(edge: .bottom) {
-                Button("Translate Now") {
-                    configuration = .init(source: .init(identifier: sourceLanguage),
-                                         target: .init(identifier: targetLanguage))
+                VStack {
+                    Button("Translate Now") {
+                        configuration = .init(source: .init(identifier: sourceLanguage),
+                                              target: .init(identifier: targetLanguage))
+                    }
+                    .buttonStyle(.borderedProminent).padding()
+                    Button("Copy Text") {
+                        UIPasteboard.general.string = translatedText
+                    }
+                    .disabled(translatedText.isEmpty)
+                    .buttonStyle(.borderedProminent).padding()
                 }
-                .buttonStyle(.borderedProminent).padding()
             }
             .translationTask(configuration) { session in
                 isTranslating = true
