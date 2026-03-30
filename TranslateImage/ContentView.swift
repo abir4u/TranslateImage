@@ -74,7 +74,7 @@ struct ContentView: View {
                 .padding()
                 .background(.ultraThinMaterial) // Gives that professional translucent look
             }
-            .navigationTitle("Image Translate")
+            .navigationTitle("OptoLingo")
             .navigationBarTitleDisplayMode(.inline)
         }
         .confirmationDialog("Select Source", isPresented: $showSourceSelection) {
