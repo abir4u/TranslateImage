@@ -396,6 +396,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Image Translate";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app uses the camera to scan text";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "This app needs access to your photos to scan text";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -442,6 +443,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Image Translate";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app uses the camera to scan text";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "This app needs access to your photos to scan text";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
